@@ -1,203 +1,217 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { ArrowUpRight, CreditCard, FileText, Users, Activity } from 'lucide-react'
-import { Button } from '../components/ui/BaseComponents'
-import { useNavigate } from 'react-router-dom'
-import { fetchClients } from '../services/clients'
-import { fetchLoans } from '../services/loans'
-import './Dashboard.css'
-
-const formatCurrency = (amountString, currency) => {
-  const amount = Number(amountString)
-  if (!Number.isFinite(amount)) return `${amountString} ${currency}`
-  try {
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: currency || 'USD',
-      maximumFractionDigits: 2,
-    }).format(amount)
-  } catch {
-    return `${amount.toFixed(2)} ${currency || 'USD'}`
-  }
-}
-
-const formatLongDate = (date) => {
-  try {
-    return new Intl.DateTimeFormat('es-ES', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    }).format(date)
-  } catch {
-    return date.toDateString()
-  }
-}
+import React from 'react';
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend
+} from 'recharts';
+import { 
+  Users, CreditCard, Activity, 
+  ArrowUpRight, ArrowDownRight, DollarSign, Calendar 
+} from 'lucide-react';
+import './Dashboard.css';
 
 const Dashboard = () => {
-  const navigate = useNavigate()
-  const [clients, setClients] = useState([])
-  const [loans, setLoans] = useState([])
+  // Mock Data for Charts
+  const loanPerformanceData = [
+    { name: 'Ene', solicitudes: 4000, aprobados: 2400 },
+    { name: 'Feb', solicitudes: 3000, aprobados: 1398 },
+    { name: 'Mar', solicitudes: 2000, aprobados: 9800 },
+    { name: 'Abr', solicitudes: 2780, aprobados: 3908 },
+    { name: 'May', solicitudes: 1890, aprobados: 4800 },
+    { name: 'Jun', solicitudes: 2390, aprobados: 3800 },
+    { name: 'Jul', solicitudes: 3490, aprobados: 4300 },
+  ];
 
-  useEffect(() => {
-    let cancelled = false
+  const loanTypeData = [
+    { name: 'Personal', value: 400 },
+    { name: 'Hipotecario', value: 300 },
+    { name: 'Automotriz', value: 300 },
+    { name: 'Empresarial', value: 200 },
+  ];
 
-    const load = async () => {
-      try {
-        const [clientsData, loansData] = await Promise.all([fetchClients(), fetchLoans()])
-        if (cancelled) return
-        setClients(clientsData)
-        setLoans(loansData)
-      } catch (error) {
-        console.error(error)
-      }
-    }
+  const COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b'];
 
-    load()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  const stats = useMemo(() => {
-    const totals = {
-      totalLoans: loans.length,
-      pending: 0,
-      approved: 0,
-      rejected: 0,
-      totalPrincipal: 0,
-      delinquentClients: 0,
-    }
-
-    for (const loan of loans) {
-      if (loan.status === 'pending') totals.pending += 1
-      if (loan.status === 'approved') totals.approved += 1
-      if (loan.status === 'rejected') totals.rejected += 1
-
-      const principal = Number(loan.principal_amount)
-      if (Number.isFinite(principal)) totals.totalPrincipal += principal
-    }
-
-    for (const client of clients) {
-      if (client.is_delinquent) totals.delinquentClients += 1
-    }
-
-    return totals
-  }, [clients, loans])
-
-  const recentLoans = useMemo(() => loans.slice(0, 6), [loans])
+  const recentActivity = [
+    { id: 1, client: 'Juan Pérez', type: 'Personal', amount: '$5,000', status: 'approved', date: 'Hoy, 12:30' },
+    { id: 2, client: 'Maria Garcia', type: 'Hipotecario', amount: '$150,000', status: 'pending', date: 'Hoy, 11:15' },
+    { id: 3, client: 'Tech Solutions SA', type: 'Empresarial', amount: '$50,000', status: 'approved', date: 'Ayer, 16:45' },
+    { id: 4, client: 'Carlos Ruiz', type: 'Automotriz', amount: '$25,000', status: 'rejected', date: 'Ayer, 09:20' },
+  ];
 
   return (
     <div className="dashboard-page">
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Hola, Administrador</h1>
-          <p className="page-subtitle">Aquí tienes el resumen financiero de hoy, {formatLongDate(new Date())}</p>
+      {/* Header */}
+      <div className="dashboard-header">
+        <div className="header-title">
+          <h1>Panel Financiero</h1>
+          <p>Resumen de operaciones y métricas clave</p>
         </div>
-        <div className="header-actions">
-          <Button onClick={() => navigate('/loans')} className="btn-primary">
-            Nuevo Préstamo <ArrowUpRight size={18} style={{ marginLeft: '8px' }} />
-          </Button>
+        <div className="date-filter">
+          <button className="btn-glass">
+            <Calendar size={18} />
+            <span>Este Mes</span>
+          </button>
         </div>
       </div>
 
-      <div className="bento-grid">
-        {/* Main Stats Card - Large */}
-        <div className="bento-card card-main-stats">
-          <div className="card-content">
-            <div className="stat-label">Capital Total Colocado</div>
-            <div className="stat-value-lg text-gradient">{formatCurrency(String(stats.totalPrincipal), 'USD')}</div>
-            <div className="stat-trend positive">
-              <Activity size={16} />
-              <span>+12.5% vs mes anterior</span>
+      <div className="dashboard-grid">
+        {/* Stats Row */}
+        <div className="stats-container">
+          <StatCard 
+            title="Préstamos Activos" 
+            value="$2.4M" 
+            trend="+12.5%" 
+            icon={<CreditCard />} 
+            color="blue" 
+          />
+          <StatCard 
+            title="Nuevos Clientes" 
+            value="843" 
+            trend="+5.2%" 
+            icon={<Users />} 
+            color="green" 
+          />
+          <StatCard 
+            title="Tasa de Aprobación" 
+            value="68%" 
+            trend="-2.1%" 
+            isNegative 
+            icon={<Activity />} 
+            color="purple" 
+          />
+          <StatCard 
+            title="Ingresos Totales" 
+            value="$892k" 
+            trend="+8.4%" 
+            icon={<DollarSign />} 
+            color="orange" 
+          />
+        </div>
+
+        {/* Main Chart - Area */}
+        <div className="glass-panel main-chart-section">
+          <div className="chart-header">
+            <h3>Tendencia de Solicitudes vs Aprobaciones</h3>
+            <div className="chart-legend">
+              <div className="legend-item"><span className="dot" style={{background: '#3b82f6'}}></span>Solicitudes</div>
+              <div className="legend-item"><span className="dot" style={{background: '#10b981'}}></span>Aprobados</div>
             </div>
           </div>
-          <div className="card-decoration">
-            <div className="chart-placeholder"></div>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={loanPerformanceData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorSol" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorApr" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9ca3af'}} />
+              <YAxis axisLine={false} tickLine={false} tick={{fill: '#9ca3af'}} />
+              <CartesianGrid vertical={false} stroke="#e5e7eb" strokeOpacity={0.3} />
+              <Tooltip 
+                contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+              />
+              <Area type="monotone" dataKey="solicitudes" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorSol)" />
+              <Area type="monotone" dataKey="aprobados" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorApr)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Secondary Chart - Pie */}
+        <div className="glass-panel secondary-chart-section">
+          <div className="chart-header">
+            <h3>Distribución por Tipo</h3>
+          </div>
+          <div style={{ height: '300px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={loanTypeData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {loanTypeData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend verticalAlign="bottom" height={36}/>
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Secondary Stats */}
-        <div className="bento-card card-stat-1">
-          <div className="kpi-header">
-            <div className="kpi-icon icon-cyan"><Users size={24} /></div>
-            <span className="kpi-label">Clientes Activos</span>
+        {/* Recent Activity Table */}
+        <div className="glass-panel activity-section">
+          <div className="chart-header">
+            <h3>Actividad Reciente</h3>
+            <button className="btn-text">Ver todo</button>
           </div>
-          <div className="kpi-value">{clients.length}</div>
-          <div className="kpi-meta">
-            {stats.delinquentClients > 0 ? (
-              <span style={{ color: 'var(--error-color)' }}>{stats.delinquentClients} en mora</span>
-            ) : (
-              <span className="text-neon">Sin morosidad</span>
-            )}
-          </div>
-        </div>
-
-        <div className="bento-card card-stat-2">
-          <div className="kpi-header">
-            <div className="kpi-icon icon-pink"><CreditCard size={24} /></div>
-            <span className="kpi-label">Préstamos Totales</span>
-          </div>
-          <div className="kpi-value">{stats.totalLoans}</div>
-          <div className="kpi-meta">
-            <span className="text-neon">{stats.pending} pendientes</span>
-          </div>
-        </div>
-
-        <div className="bento-card card-stat-3">
-          <div className="kpi-header">
-            <div className="kpi-icon icon-violet"><Activity size={24} /></div>
-            <span className="kpi-label">Tasa Aprobación</span>
-          </div>
-          <div className="kpi-value">
-            {stats.totalLoans > 0 
-              ? `${Math.round((stats.approved / stats.totalLoans) * 100)}%` 
-              : '0%'}
-          </div>
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${stats.totalLoans > 0 ? (stats.approved / stats.totalLoans) * 100 : 0}%` }}
-            ></div>
-          </div>
-        </div>
-
-        {/* Recent Activity - Wide */}
-        <div className="bento-card card-recent">
-          <div className="section-header">
-            <h2 className="section-title">Actividad Reciente</h2>
-            <Button variant="ghost" onClick={() => navigate('/loans')}>Ver todo</Button>
-          </div>
-
-          <div className="recent-table">
-            <div className="recent-header">
-              <div>ID Préstamo</div>
-              <div>Cliente</div>
-              <div>Monto</div>
-              <div>Estado</div>
-            </div>
-
-            {recentLoans.length === 0 && (
-              <div className="empty-state" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                <p>No hay actividad reciente para mostrar</p>
-              </div>
-            )}
-
-            {recentLoans.map((loan) => (
-              <div key={loan.loan_id} className="recent-row">
-                <div className="mono" style={{ color: 'var(--accent-primary)' }}>#{loan.loan_id.substring(0, 8)}...</div>
-                <div className="client-info">
-                  <span className="client-name">Cliente {loan.client_id}</span>
-                </div>
-                <div className="amount">{formatCurrency(loan.principal_amount, loan.currency)}</div>
-                <div>
-                  <span className={`status-pill status-${loan.status}`}>{loan.status}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <table className="modern-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Tipo de Préstamo</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentActivity.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    <div style={{fontWeight: 600, color: 'var(--text-primary)'}}>{item.client}</div>
+                  </td>
+                  <td>{item.type}</td>
+                  <td style={{fontFamily: 'monospace', fontSize: '1rem'}}>{item.amount}</td>
+                  <td>{item.date}</td>
+                  <td>
+                    <span className={`status-chip ${item.status}`}>
+                      {item.status === 'approved' ? 'Aprobado' : item.status === 'pending' ? 'Pendiente' : 'Rechazado'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+const StatCard = ({ title, value, trend, icon, color, isNegative }) => (
+  <div className="stat-card-modern">
+    <div className={`stat-icon-box ${color}`}>
+      {icon}
+    </div>
+    <div className="stat-info">
+      <h3>{title}</h3>
+      <div className="value">{value}</div>
+    </div>
+    <div className="trend-indicator" style={{ 
+      position: 'absolute', 
+      top: '1.5rem', 
+      right: '1.5rem',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.25rem',
+      color: isNegative ? 'var(--error-color)' : 'var(--success-color)',
+      fontWeight: 600,
+      fontSize: '0.9rem'
+    }}>
+      {isNegative ? <ArrowDownRight size={16} /> : <ArrowUpRight size={16} />}
+      {trend}
+    </div>
+  </div>
+);
+
+export default Dashboard;

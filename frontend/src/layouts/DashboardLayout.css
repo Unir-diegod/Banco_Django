@@ -62,7 +62,7 @@
 
 .nav-item.active {
     background: var(--accent-primary);
-    color: #000;
+    color: var(--nav-active-text);
     box-shadow: var(--glow-primary);
     border-color: var(--accent-primary);
 }

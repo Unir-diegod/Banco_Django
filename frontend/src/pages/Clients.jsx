@@ -14,10 +14,6 @@ const Clients = () => {
         address: ''
     });
 
-    useEffect(() => {
-        loadClients();
-    }, []);
-
     const loadClients = async () => {
         try {
             const data = await fetchClients();
@@ -26,6 +22,11 @@ const Clients = () => {
             console.error('Error loading clients:', error);
         }
     };
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        loadClients();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

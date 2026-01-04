@@ -41,24 +41,50 @@
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 24px;
+
+  /* Navigation */
+  --nav-active-text: #000000;
 }
 
-/* Light Mode Overrides */
+/* Light Mode Overrides - Royal Blue Corporate Theme */
 [data-theme="light"] {
-  --bg-color: #F0F2F5;
+  /* Backgrounds */
+  --bg-color: #F8FAFC; /* Slate 50 */
   --surface-color: #FFFFFF;
-  --surface-hover: #F8F9FA;
+  --surface-hover: #F1F5F9; /* Slate 100 */
   
-  --text-primary: #111827;
-  --text-secondary: #4B5563;
-  --text-muted: #9CA3AF;
+  /* Text - High Contrast */
+  --text-primary: #0F172A; /* Slate 900 */
+  --text-secondary: #475569; /* Slate 600 */
+  --text-muted: #94A3B8; /* Slate 400 */
   
-  --border-color: #E5E7EB;
+  --border-color: #E2E8F0; /* Slate 200 */
   
-  /* Adjust glows for light mode to be more subtle or darker shadows */
-  --glow-primary: 0 4px 12px rgba(198, 255, 0, 0.4);
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: 1px solid rgba(0, 0, 0, 0.05);
+  /* Accents - Royal Blue Theme */
+  --accent-primary: #1E40AF; /* Blue 800 (Royal Blue) */
+  --accent-cyan: #0369A1; /* Sky 700 */
+  --accent-pink: #BE123C; /* Rose 700 */
+  --accent-violet: #6D28D9; /* Violet 700 */
+  
+  /* Mapped Semantic Colors */
+  --accent-green: #15803D; /* Green 700 */
+  --accent-yellow: #B45309; /* Amber 700 */
+  
+  --success-color: #15803D;
+  --error-color: #BE123C;
+  
+  /* Clean Shadows (No Glows) */
+  --glow-primary: 0 4px 6px -1px rgba(30, 64, 175, 0.1), 0 2px 4px -1px rgba(30, 64, 175, 0.06);
+  --glow-cyan: 0 4px 6px -1px rgba(3, 105, 161, 0.1);
+  --glow-pink: 0 4px 6px -1px rgba(190, 18, 60, 0.1);
+  
+  --glow-text: none;
+  
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: 1px solid #E2E8F0;
+
+  /* Navigation */
+  --nav-active-text: #FFFFFF;
 }
 
 * {
