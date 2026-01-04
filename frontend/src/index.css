@@ -1,0 +1,120 @@
+:root {
+  /* Dark Mode Base (Default) */
+  --bg-color: #050505;
+  --surface-color: #111111;
+  --surface-hover: #1a1a1a;
+  
+  /* Text */
+  --text-primary: #FFFFFF;
+  --text-secondary: #A1A1AA;
+  --text-muted: #52525B;
+
+  /* Neon Accents - Updated Palette */
+  --accent-primary: #C6FF00; /* The requested Lime Neon */
+  --accent-cyan: #00E5FF;
+  --accent-pink: #FF2E93;
+  --accent-violet: #9D00FF;
+  
+  /* Mapped Semantic Colors */
+  --accent-green: var(--accent-primary); /* Mapping for backward compatibility */
+  --accent-yellow: #FFD600;
+  
+  /* Functional Colors */
+  --border-color: #27272A;
+  --success-color: #C6FF00;
+  --error-color: #FF2E93;
+  
+  /* Effects */
+  --glow-primary: 0 0 8px #C6FF00, 0 0 16px rgba(198, 255, 0, 0.6);
+  --glow-cyan: 0 0 10px rgba(0, 229, 255, 0.5);
+  --glow-pink: 0 0 10px rgba(255, 46, 147, 0.5);
+  
+  --glow-text: 0 0 8px #C6FF00, 0 0 16px #C6FF00; /* Requested text shadow */
+  
+  --glass-bg: rgba(17, 17, 17, 0.7);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+
+  /* Typography */
+  --font-family: 'Outfit', 'Inter', sans-serif;
+
+  /* Spacing */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
+}
+
+/* Light Mode Overrides */
+[data-theme="light"] {
+  --bg-color: #F0F2F5;
+  --surface-color: #FFFFFF;
+  --surface-hover: #F8F9FA;
+  
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #9CA3AF;
+  
+  --border-color: #E5E7EB;
+  
+  /* Adjust glows for light mode to be more subtle or darker shadows */
+  --glow-primary: 0 4px 12px rgba(198, 255, 0, 0.4);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Background pattern only for dark mode */
+body:not([data-theme="light"]) {
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(198, 255, 0, 0.05) 0%, transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(0, 229, 255, 0.04) 0%, transparent 25%);
+}
+
+button {
+  font-family: inherit;
+}
+
+/* Scrollbar moderno */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Utility classes for neon text */
+.text-neon {
+  color: var(--accent-primary);
+  text-shadow: var(--glow-text);
+}
+
+.text-gradient {
+  background: linear-gradient(to right, var(--accent-primary), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

@@ -1,0 +1,123 @@
+/* UI Components CSS */
+
+/* Button */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+}
+
+.btn-primary {
+    background-color: var(--accent-primary);
+    color: #000000;
+    box-shadow: var(--glow-primary);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow-primary);
+    filter: brightness(1.1);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--surface-hover);
+    border-color: var(--text-primary);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+}
+
+.btn-ghost:hover {
+    color: var(--accent-primary);
+    background: var(--surface-hover);
+}
+
+/* Input */
+.input-wrapper {
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.input-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+    transition: color 0.2s;
+}
+
+.input-field {
+    width: 100%;
+    padding: 1rem 1rem;
+    background-color: var(--surface-hover);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.2s;
+    color: var(--text-primary);
+}
+
+.input-field.has-icon {
+    padding-left: 3rem;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    background-color: var(--surface-color);
+    box-shadow: 0 0 0 1px var(--accent-primary), var(--glow-primary);
+}
+
+.input-field:focus + .input-icon,
+.input-container:focus-within .input-icon {
+    color: var(--accent-primary);
+}
+
+/* Card */
+.card {
+    background: var(--surface-color);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}

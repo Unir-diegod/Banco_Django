@@ -1,0 +1,1 @@
+"""Infrastructure repositories (ORM adapters)."""
