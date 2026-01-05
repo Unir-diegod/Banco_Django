@@ -22,6 +22,8 @@ class ClientProfile(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name="client_profile")
+    phone = models.CharField(max_length=40, blank=True, default="")
+    address = models.CharField(max_length=250, blank=True, default="")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE)
     is_delinquent = models.BooleanField(default=False)
     payment_capacity_monthly = models.DecimalField(max_digits=12, decimal_places=2, default=0)

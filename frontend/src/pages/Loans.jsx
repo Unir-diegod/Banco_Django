@@ -48,40 +48,22 @@ const Loans = () => {
         };
     }, []);
 
-    const annualPercentToMonthlyDecimalString = (annualPercent) => {
-        const raw = String(annualPercent ?? '').trim();
-        const normalized = raw.replace(',', '.');
-        const annual = Number(normalized);
-        if (!Number.isFinite(annual)) return '0.000000';
-        const monthlyDecimal = (annual / 100) / 12;
-        return monthlyDecimal.toFixed(6);
-    };
-
-    const sanitizeAmountString = (value) => {
-        const raw = String(value ?? '').trim();
-        const normalized = raw.replace(/[^0-9.,-]/g, '').replace(',', '.');
-        const num = Number(normalized);
-        if (!Number.isFinite(num)) return '0.00';
-        return num.toFixed(2);
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await createLoan({
-                client_id: formData.client_id,
-                principal_amount: sanitizeAmountString(formData.principal_amount),
-                currency: 'USD',
-                monthly_rate: annualPercentToMonthlyDecimalString(formData.monthly_rate),
-                term_months: Number.parseInt(formData.term_months, 10),
-            });
-
+            await createLoan(formData);
             const loansData = await fetchLoans();
             setLoans(loansData);
             setShowModal(false);
+            setFormData({
+                client_id: '',
+                principal_amount: '0.00',
+                term_months: '12',
+                monthly_rate: '15'
+            });
         } catch (error) {
             console.error(error);
-            alert('No se pudo crear el préstamo');
+            alert('Error al crear el préstamo');
         }
     };
 
@@ -90,133 +72,162 @@ const Loans = () => {
             <div className="page-header">
                 <div>
                     <h1 className="page-title">Préstamos</h1>
-                    <p className="page-subtitle">Gestión y seguimiento de créditos</p>
+                    <p className="page-subtitle">Administración y seguimiento de créditos</p>
                 </div>
                 <Button onClick={() => setShowModal(true)} className="btn-primary">
                     <Plus size={20} style={{ marginRight: '8px' }} />
-                    Nuevo Préstamo
+                    Solicitar Préstamo
                 </Button>
             </div>
 
             <div className="content-section">
-                <div className="loans-table-container">
-                    <div className="table-controls">
-                        <div className="search-bar">
-                            <Search size={18} />
-                            <input type="text" placeholder="Buscar préstamo..." />
-                        </div>
-                        <button className="filter-btn">
-                            <Filter size={18} />
-                            Filtros
-                        </button>
+                <div className="controls-bar">
+                    <div className="search-wrapper">
+                        <Search size={18} className="search-icon" />
+                        <input type="text" className="search-input" placeholder="Buscar préstamo..." />
                     </div>
+                    <Button className="btn-secondary">
+                        <Filter size={18} style={{ marginRight: '8px' }} />
+                        Filtros
+                    </Button>
+                </div>
 
-                    <div className="loans-table">
-                        <div className="table-header">
-                            <div className="col-prestamo">PRÉSTAMO</div>
-                            <div className="col-cliente">CLIENTE</div>
-                            <div className="col-detalles">DETALLES</div>
-                            <div className="col-estado">ESTADO</div>
-                            <div className="col-acciones">ACCIONES</div>
-                        </div>
-
-                        {loans.length === 0 && (
-                            <div className="empty-state">
-                                <p>No hay préstamos registrados</p>
-                            </div>
-                        )}
-
-                        {loans.map((loan) => (
-                            <div key={loan.id} className="table-row">
-                                <div className="col-prestamo">{loan.loan_id}</div>
-                                <div className="col-cliente">{clientsById.get(loan.client_id)?.name ?? loan.client_id}</div>
-                                <div className="col-detalles">
-                                    ${loan.principal_amount} {loan.currency} • {loan.term_months}m • {(Number(loan.monthly_rate) * 12 * 100).toFixed(2)}%
-                                </div>
-                                <div className="col-estado">{loan.status}</div>
-                                <div className="col-acciones">...</div>
-                            </div>
-                        ))}
-                    </div>
+                <div className="table-container">
+                    <table className="loans-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>CLIENTE</th>
+                                <th>DETALLES</th>
+                                <th>ESTADO</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loans.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" style={{textAlign: 'center', padding: '2rem'}}>
+                                        No hay préstamos registrados
+                                    </td>
+                                </tr>
+                            ) : (
+                                loans.map((loan) => (
+                                    <tr key={loan.id}>
+                                        <td style={{fontFamily: 'monospace', color: 'var(--accent-primary)'}}>
+                                            #{String(loan.loan_id).slice(0, 8)}
+                                        </td>
+                                        <td style={{fontWeight: 600}}>
+                                            {clientsById.get(loan.client_id)?.name ?? loan.client_id}
+                                        </td>
+                                        <td>
+                                            <div style={{display: 'flex', flexDirection: 'column', gap: '0.25rem'}}>
+                                                <span style={{color: 'var(--text-primary)', fontWeight: 600}}>
+                                                    ${Number(loan.principal_amount).toLocaleString()} {loan.currency}
+                                                </span>
+                                                <span style={{fontSize: '0.85rem', color: 'var(--text-secondary)'}}>
+                                                    {loan.term_months} meses • {(Number(loan.monthly_rate) * 12 * 100).toFixed(2)}% anual
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className={`status-badge ${loan.status.toLowerCase()}`}>
+                                                {loan.status}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <Button className="btn-secondary" style={{padding: '0.4rem 0.8rem', fontSize: '0.8rem'}}>
+                                                Ver Detalle
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
             {/* Modal */}
             {showModal && (
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <div>
-                                <h2 className="modal-title">Solicitar Préstamo</h2>
-                                <p className="modal-subtitle">Nueva solicitud de crédito.</p>
+                                <h2>Solicitar Préstamo</h2>
+                                <p style={{color: 'var(--text-secondary)', fontSize: '0.9rem'}}>Crear una nueva solicitud de crédito.</p>
                             </div>
                             <button className="close-btn" onClick={() => setShowModal(false)}>
                                 <X size={24} />
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleSubmit} className="modal-form">
                             <div className="form-group">
-                                <label className="form-label">CLIENTE</label>
-                                <div className="select-wrapper">
+                                <label style={{display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Cliente</label>
+                                <div style={{position: 'relative'}}>
                                     <select
-                                        className="form-select"
+                                        className="search-input"
                                         value={formData.client_id}
                                         onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
                                         required
+                                        style={{appearance: 'none', cursor: 'pointer'}}
                                     >
-                                        <option value="">Seleccionar cliente</option>
-                                        {clients.map((client) => (
+                                        <option value="">Seleccionar cliente...</option>
+                                        {clients.map(client => (
                                             <option key={client.client_id} value={client.client_id}>
                                                 {client.name}
                                             </option>
                                         ))}
                                     </select>
-                                    <ChevronDown size={20} className="select-icon" />
+                                    <ChevronDown size={16} style={{position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-secondary)'}} />
                                 </div>
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">MONTO ($)</label>
-                                <input
-                                    type="text"
-                                    className="form-input amount-input"
-                                    value={formData.principal_amount}
-                                    onChange={(e) => setFormData({ ...formData, principal_amount: e.target.value })}
-                                    required
-                                />
                             </div>
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label className="form-label">PLAZO (MESES)</label>
+                                    <label style={{display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Monto Principal</label>
                                     <input
                                         type="number"
-                                        className="form-input"
-                                        value={formData.term_months}
-                                        onChange={(e) => setFormData({ ...formData, term_months: e.target.value })}
+                                        className="search-input"
+                                        value={formData.principal_amount}
+                                        onChange={(e) => setFormData({ ...formData, principal_amount: e.target.value })}
                                         required
+                                        min="1000"
+                                        step="100"
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label className="form-label">TASA ANUAL (%)</label>
+                                    <label style={{display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Plazo (Meses)</label>
                                     <input
                                         type="number"
-                                        className="form-input"
-                                        value={formData.monthly_rate}
-                                        onChange={(e) => setFormData({ ...formData, monthly_rate: e.target.value })}
+                                        className="search-input"
+                                        value={formData.term_months}
+                                        onChange={(e) => setFormData({ ...formData, term_months: e.target.value })}
                                         required
+                                        min="1"
+                                        max="120"
                                     />
                                 </div>
                             </div>
 
-                            <div className="modal-actions">
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                            <div className="form-group">
+                                <label style={{display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Tasa Mensual (%)</label>
+                                <input
+                                    type="number"
+                                    className="search-input"
+                                    value={formData.monthly_rate}
+                                    onChange={(e) => setFormData({ ...formData, monthly_rate: e.target.value })}
+                                    required
+                                    step="0.01"
+                                />
+                            </div>
+
+                            <div className="form-actions">
+                                <Button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
                                     Cancelar
-                                </button>
-                                <Button type="submit" className="btn-icon">
-                                    Solicitar
-                                    <span style={{ marginLeft: '0.5rem' }}>→</span>
+                                </Button>
+                                <Button type="submit" className="btn-primary">
+                                    Crear Solicitud
                                 </Button>
                             </div>
                         </form>

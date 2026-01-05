@@ -11,6 +11,12 @@ const LoginPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
+    // Clear existing tokens on load to prevent sending invalid auth headers
+    React.useEffect(() => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+    }, []);
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 import uuid
 from datetime import date, timedelta
 from decimal import Decimal
@@ -24,6 +25,47 @@ class Command(BaseCommand):
         parser.add_argument("--client-username", default="client1")
         parser.add_argument("--client-email", default="client1@example.com")
         parser.add_argument("--client-password", default="client1234")
+        parser.add_argument("--with-historical-data", action="store_true", help="Genera datos históricos para gráficos")
+
+    def create_historical_loans(self, profile):
+        """Crea préstamos históricos de los últimos 6 meses para dashboards"""
+        now = timezone.now()
+        statuses = [Loan.Status.APPROVED, Loan.Status.PENDING, Loan.Status.REJECTED, Loan.Status.APPROVED]
+        
+        created_loans = []
+        for months_ago in range(6, -1, -1):  # 6 meses atrás hasta ahora
+            # Crear entre 1-3 préstamos por mes
+            num_loans = random.randint(1, 3)
+            for _ in range(num_loans):
+                created_date = now - timedelta(days=30 * months_ago + random.randint(0, 25))
+                status = random.choice(statuses)
+                
+                loan = Loan.objects.create(
+                    client_profile=profile,
+                    principal_amount=Decimal(str(random.randint(500, 5000))),
+                    currency="USD",
+                    monthly_rate=Decimal("0.030000"),
+                    term_months=random.choice([6, 12, 24]),
+                    status=status,
+                )
+                # Actualizar created_at manualmente
+                Loan.objects.filter(id=loan.id).update(created_at=created_date)
+                
+                # Si está aprobado, crear algunas cuotas
+                if status == Loan.Status.APPROVED:
+                    for i in range(1, min(loan.term_months + 1, 4)):  # Max 3 cuotas
+                        Installment.objects.create(
+                            loan=loan,
+                            number=i,
+                            due_date=(created_date + timedelta(days=30 * i)).date(),
+                            amount=loan.principal_amount / loan.term_months,
+                            currency=loan.currency,
+                            status=Installment.Status.PENDING,
+                        )
+                
+                created_loans.append(loan)
+        
+        return created_loans
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -103,9 +145,18 @@ class Command(BaseCommand):
                 status=Installment.Status.PENDING,
             )
 
+        # Crear datos históricos si se especifica
+        historical_loans = []
+        if options.get("with_historical_data"):
+            self.stdout.write("Generando datos históricos...")
+            historical_loans = self.create_historical_loans(profile)
+            self.stdout.write(self.style.SUCCESS(f"Creados {len(historical_loans)} préstamos históricos"))
+
         self.stdout.write(self.style.SUCCESS("Seed completado"))
         self.stdout.write(f"ADMIN username={admin.username} password={options['admin_password']}")
         self.stdout.write(f"CLIENT username={client_user.username} password={options['client_password']}")
         self.stdout.write(f"client_id={profile.id}")
         self.stdout.write(f"loan_id={loan.id}")
         self.stdout.write(f"installment_id={installment.id}")
+        if historical_loans:
+            self.stdout.write(f"historical_loans_count={len(historical_loans)}")

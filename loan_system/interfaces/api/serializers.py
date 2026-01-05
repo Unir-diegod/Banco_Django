@@ -28,3 +28,10 @@ class QuoteLoanSerializer(serializers.Serializer):
     currency = serializers.CharField(max_length=3)
     monthly_rate = serializers.DecimalField(max_digits=7, decimal_places=6)
     term_months = serializers.IntegerField(min_value=1, max_value=600)
+
+
+class CreateClientSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=150)
+    email = serializers.EmailField(max_length=254)
+    phone = serializers.CharField(max_length=40, required=False, allow_blank=True)
+    address = serializers.CharField(max_length=250, required=False, allow_blank=True)

@@ -52,3 +52,22 @@ frontend/.env
 # OS
 .DS_Store
 Thumbs.db
+
+# Script runtime files
+*.pid
+*.out.log
+*.err.log
+
+# Test cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary files
+*.tmp
+*.bak
+
+# Script runtime files
+*.pid
+*.out.log
+*.err.log

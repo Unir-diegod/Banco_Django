@@ -13,11 +13,12 @@ Incluye:
 
 ## Documentación técnica
 
-- docs/ARQUITECTURA.md
-- docs/API.md
-- docs/SEGURIDAD_Y_AUDITORIA.md
-- docs/OPERACION.md
-- docs/DESARROLLO_Y_TESTS.md
+- [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md)
+- [docs/API.md](docs/API.md)
+- [docs/SEGURIDAD_Y_AUDITORIA.md](docs/SEGURIDAD_Y_AUDITORIA.md)
+- [docs/OPERACION.md](docs/OPERACION.md)
+- [docs/DESARROLLO_Y_TESTS.md](docs/DESARROLLO_Y_TESTS.md)
+- [docs/ESTRUCTURA.md](docs/ESTRUCTURA.md) ⭐ **Estructura del proyecto y archivos importantes**
 
 ## Estructura del repo
 

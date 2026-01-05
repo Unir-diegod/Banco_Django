@@ -24,7 +24,6 @@ const Clients = () => {
     };
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadClients();
     }, []);
 
@@ -64,75 +63,92 @@ const Clients = () => {
             </div>
 
             <div className="content-section">
-                <div className="clients-table-container">
-                    <div className="table-controls">
-                        <div className="search-bar">
-                            <Search size={18} />
-                            <input type="text" placeholder="Buscar cliente..." />
-                        </div>
-                        <button className="filter-btn">
-                            <Filter size={18} />
-                            Filtros
-                        </button>
+                <div className="controls-bar">
+                    <div className="search-wrapper">
+                        <Search size={18} className="search-icon" />
+                        <input type="text" className="search-input" placeholder="Buscar cliente..." />
                     </div>
+                    <Button className="btn-secondary">
+                        <Filter size={18} style={{ marginRight: '8px' }} />
+                        Filtros
+                    </Button>
+                </div>
 
-                    <div className="clients-table">
-                        <div className="table-header">
-                            <div className="col-id">ID</div>
-                            <div className="col-name">NOMBRE</div>
-                            <div className="col-email">EMAIL</div>
-                            <div className="col-phone">TELÉFONO</div>
-                            <div className="col-status">ESTADO</div>
-                        </div>
-
-                        {clients.length === 0 && (
-                            <div className="empty-state">
-                                <p>No hay clientes registrados</p>
-                            </div>
-                        )}
-
-                        {clients.map((client) => (
-                            <div key={client.client_id} className="table-row">
-                                <div className="col-id">#{String(client.client_id).slice(0, 6)}</div>
-                                <div className="col-name">
-                                    <div className="client-avatar">
-                                        {getInitials(client.name)}
-                                    </div>
-                                    {client.name}
-                                </div>
-                                <div className="col-email">{client.email}</div>
-                                <div className="col-phone">{client.phone || 'N/A'}</div>
-                                <div className="col-status">
-                                    <span className={`status-badge ${client.is_delinquent ? 'status-delinquent' : 'status-active'}`}>
-                                        {client.is_delinquent ? 'Moroso' : 'Activo'}
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                <div className="table-container">
+                    <table className="clients-table">
+                        <thead>
+                            <tr>
+                                <th>CLIENTE</th>
+                                <th>EMAIL</th>
+                                <th>TELÉFONO</th>
+                                <th>DIRECCIÓN</th>
+                                <th>ESTADO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {clients.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" style={{textAlign: 'center', padding: '2rem'}}>
+                                        No hay clientes registrados
+                                    </td>
+                                </tr>
+                            ) : (
+                                clients.map((client) => (
+                                    <tr key={client.client_id}>
+                                        <td>
+                                            <div className="client-info">
+                                                <div className="client-avatar">
+                                                    {getInitials(client.name)}
+                                                </div>
+                                                <div className="client-details">
+                                                    <h3>{client.name}</h3>
+                                                    <p>ID: #{String(client.client_id).slice(0, 6)}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{client.email}</td>
+                                        <td>{client.phone || 'N/A'}</td>
+                                        <td>{client.address || 'N/A'}</td>
+                                        <td>
+                                            <span style={{
+                                                padding: '0.25rem 0.75rem',
+                                                borderRadius: '100px',
+                                                fontSize: '0.8rem',
+                                                fontWeight: 600,
+                                                background: client.is_delinquent ? 'rgba(220, 38, 38, 0.15)' : 'rgba(21, 128, 61, 0.15)',
+                                                color: client.is_delinquent ? 'var(--error-color)' : 'var(--success-color)'
+                                            }}>
+                                                {client.is_delinquent ? 'Moroso' : 'Activo'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
             {/* Modal */}
             {showModal && (
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <div>
-                                <h2 className="modal-title">Nuevo Cliente</h2>
-                                <p className="modal-subtitle">Registrar un nuevo cliente en el sistema.</p>
+                                <h2>Nuevo Cliente</h2>
+                                <p style={{color: 'var(--text-secondary)', fontSize: '0.9rem'}}>Registrar un nuevo cliente en el sistema.</p>
                             </div>
                             <button className="close-btn" onClick={() => setShowModal(false)}>
                                 <X size={24} />
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleSubmit} className="modal-form">
                             <div className="form-group">
-                                <label className="form-label">Nombre Completo</label>
+                                <label style={{display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Nombre Completo</label>
                                 <input
                                     type="text"
-                                    className="form-input"
+                                    className="search-input"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     required
@@ -140,12 +156,12 @@ const Clients = () => {
                                 />
                             </div>
 
-                            <div className="form-row">
+                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
                                 <div className="form-group">
-                                    <label className="form-label">Email</label>
+                                    <label style={{display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Email</label>
                                     <input
                                         type="email"
-                                        className="form-input"
+                                        className="search-input"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         required
@@ -153,34 +169,34 @@ const Clients = () => {
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label className="form-label">Teléfono</label>
+                                    <label style={{display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Teléfono</label>
                                     <input
                                         type="tel"
-                                        className="form-input"
+                                        className="search-input"
                                         value={formData.phone}
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                        placeholder="+54 11 ..."
+                                        placeholder="+52 555..."
                                     />
                                 </div>
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Dirección</label>
+                                <label style={{display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)'}}>Dirección</label>
                                 <input
                                     type="text"
-                                    className="form-input"
+                                    className="search-input"
                                     value={formData.address}
                                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                    placeholder="Calle Falsa 123"
+                                    placeholder="Calle Principal #123"
                                 />
                             </div>
 
-                            <div className="modal-actions">
-                                <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>
+                            <div className="form-actions">
+                                <Button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
                                     Cancelar
                                 </Button>
                                 <Button type="submit" className="btn-primary">
-                                    Registrar Cliente
+                                    Guardar Cliente
                                 </Button>
                             </div>
                         </form>
