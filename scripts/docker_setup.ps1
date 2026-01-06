@@ -1,11 +1,23 @@
 $ErrorActionPreference = 'Stop'
 
-# Configuracion del contenedor MySQL
+# SEGURIDAD: Leer credenciales de variables de entorno
 $mysqlContainer = 'banco-mysql'
-$mysqlRootPassword = 'RootPass123!'
-$mysqlDb = 'loan_system_db'
-$mysqlUser = 'loan_user'
-$mysqlPassword = 'TuContrasenaSegura123!'
+$mysqlRootPassword = $env:MYSQL_ROOT_PASSWORD
+if (-not $mysqlRootPassword) {
+    Write-Host "ERROR: Variable MYSQL_ROOT_PASSWORD no definida" -ForegroundColor Red
+    Write-Host "Define: `$env:MYSQL_ROOT_PASSWORD = 'tu-password-seguro'" -ForegroundColor Yellow
+    exit 1
+}
+$mysqlDb = $env:MYSQL_NAME
+if (-not $mysqlDb) { $mysqlDb = 'loan_system_db' }
+$mysqlUser = $env:MYSQL_USER
+if (-not $mysqlUser) { $mysqlUser = 'loan_user' }
+$mysqlPassword = $env:MYSQL_PASSWORD
+if (-not $mysqlPassword) {
+    Write-Host "ERROR: Variable MYSQL_PASSWORD no definida" -ForegroundColor Red
+    Write-Host "Define: `$env:MYSQL_PASSWORD = 'tu-password-seguro'" -ForegroundColor Yellow
+    exit 1
+}
 $mysqlPort = '3307'
 
 function Write-ColorOutput($message, $color) {
